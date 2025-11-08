@@ -96,7 +96,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 		}
 		resolver = &sock5Resolver{netType: netType}
 	} else {
-		log.Printf("%s --(default)-> outbound", clientIP)
+		log.Printf("Proxy: %s --(default)-> outbound", clientIP)
 	}
 
 	conf := &socks5.Config{Dial: dialer, Resolver: resolver}
