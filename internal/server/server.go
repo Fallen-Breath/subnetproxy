@@ -44,7 +44,19 @@ func (s *Server) Serve() {
 	}
 }
 
-type Sock5Dialer = func(ctx context.Context, network, addr string) (net.Conn, error)
+type sock5Dialer = func(ctx context.Context, network, addr string) (net.Conn, error)
+
+type sock5Resolver struct {
+	netType string
+}
+
+func (r *sock5Resolver) Resolve(ctx context.Context, name string) (context.Context, net.IP, error) {
+	addr, err := net.ResolveIPAddr(r.netType, name)
+	if err != nil {
+		return ctx, nil, err
+	}
+	return ctx, addr.IP, err
+}
 
 func (s *Server) handleConnection(conn net.Conn) {
 	clientAddr, ok := conn.RemoteAddr().(*net.TCPAddr)
@@ -54,27 +66,40 @@ func (s *Server) handleConnection(conn net.Conn) {
 	}
 	clientIP := clientAddr.IP.String()
 
-	var dialer Sock5Dialer
+	var dialer sock5Dialer
+	var resolver socks5.NameResolver
 	if s.Subnet != nil {
 		var localIP net.IP
 		if s.Strategy == "hash" {
 			localIP = s.Subnet.GetByKey(clientIP)
 		} else if s.Strategy == "random" {
 			localIP = s.Subnet.GetRandomly()
+		} else {
+			panic("unknown strategy " + s.Strategy)
 		}
 		log.Printf("%s --(%s)-> outbound", clientIP, localIP)
 
-		dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		var network, netType string
+		if localIP.To4() == nil {
+			network = "tcp6"
+			netType = "ip6"
+		} else {
+			network = "tcp4"
+			netType = "ip4"
+		}
+
+		dialer = func(ctx context.Context, _, addr string) (net.Conn, error) {
 			d := net.Dialer{
 				LocalAddr: &net.TCPAddr{IP: localIP},
 			}
 			return d.DialContext(ctx, network, addr)
 		}
+		resolver = &sock5Resolver{netType: netType}
 	} else {
 		log.Printf("%s --(default)-> outbound", clientIP)
 	}
 
-	conf := &socks5.Config{Dial: dialer}
+	conf := &socks5.Config{Dial: dialer, Resolver: resolver}
 	server, err := socks5.New(conf)
 	if err != nil {
 		log.Printf("Failed to create server for conn: %v", err)
