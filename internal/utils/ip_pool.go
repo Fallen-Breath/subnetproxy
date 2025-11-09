@@ -1,5 +1,5 @@
 // Package utils, ip_pool.go
-// From https://github.com/Fallen-Breath/pavonis/blob/403b7a17a66359b94608e940b5f42ba7bbb25cbc/internal/utils/ip_pool.go
+// From https://github.com/Fallen-Breath/pavonis/blob/c763d2be3f7b7f3dddcea575b01a375c7053e4de/internal/utils/ip_pool.go
 // Licensed under GPL-3.0
 package utils
 

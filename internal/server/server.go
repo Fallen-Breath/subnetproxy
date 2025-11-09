@@ -64,14 +64,14 @@ func (s *Server) handleConnection(conn net.Conn) {
 		log.Printf("Non-TCP connection from %s, skipping", conn.RemoteAddr().String())
 		return
 	}
-	clientIP := clientAddr.IP.String()
+	clientIP := clientAddr.IP
 
 	var dialer sock5Dialer
 	var resolver socks5.NameResolver
 	if s.Subnet != nil {
 		var localIP net.IP
 		if s.Strategy == "hash" {
-			localIP = s.Subnet.GetByKey(clientIP)
+			localIP = s.Subnet.GetByKey(utils.GetBucketForIP(clientIP))
 		} else if s.Strategy == "random" {
 			localIP = s.Subnet.GetRandomly()
 		} else {
