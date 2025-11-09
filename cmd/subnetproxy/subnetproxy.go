@@ -16,7 +16,7 @@ func main() {
 	listenAddr := flag.String("listen", ":1080", "Address for the socks5 server to listen on")
 	subnetStr := flag.String("subnet", "", "Comma-separated subnets for IP pool (e.g., 192.168.1.0/24,10.0.0.0/8)")
 	enableProxyProtocol := flag.Bool("proxyprotocol", false, "Enable PROXY protocol support to get correct client ip")
-	strategy := flag.String("strategy", "hash", "Strategy for selecting local IP: hash (hash client ip) or random")
+	strategy := flag.String("strategy", "hash", "Strategy for selecting local IP: hash (hash client ip's /64 subnet) or random")
 	showVersion := flag.Bool("version", false, "Show version and exit")
 	flag.Parse()
 

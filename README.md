@@ -12,7 +12,7 @@ Usage of ./subnetproxy:
   -proxyprotocol
         Enable PROXY protocol support to get correct client ip
   -strategy string
-        Strategy for selecting local IP: hash (hash client ip) or random (default "hash")
+        Strategy for selecting local IP: hash (hash client ip's /64 subnet) or random (default "hash")
   -subnet string
         Comma-separated subnets for IP pool (e.g., 192.168.1.0/24,10.0.0.0/8)
   -version
